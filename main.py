@@ -5,6 +5,10 @@ app = FastAPI()
 
 class EchoRequest(BaseModel):
     message: str
+    times: int
+
+class UserCreate(BaseModel):
+    name: str
 
 @app.get("/health")
 def health():
@@ -12,4 +16,13 @@ def health():
 
 @app.post("/echo")
 def echo(data: EchoRequest):
-    return {"message": data.message}
+    return {
+        "result": data.message * data.times
+    }
+
+@app.post("/users")
+def create_user(data: UserCreate):
+    return {
+        "id": 1,
+        "name": data.name
+    }
