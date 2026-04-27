@@ -17,6 +17,9 @@ class UserResponse(BaseModel):
     id: int
     name: str
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -47,7 +50,7 @@ def get_users():
 
 @app.get("/users/{id}", response_model=UserResponse)
 def get_user_id(id: int):
-    for user in users:
+    for user in users
         if user["id"] == id:
             return user
     raise HTTPException(status_code=404, detail="User Not Found")
@@ -58,4 +61,14 @@ def delete_user_id(id: int):
         if user["id"] == id:
             users.remove(user)
             return {"message": f"Successfully removed user {id}"}
+    raise HTTPException(status_code=404, detail="User Not Found")
+
+@app.put("/users/{id}", response_model=UserResponse)
+def update_user(id: int, data: UserUpdate):
+    for user in users:
+        if user["id"] == id:
+            update_data = data.model_dump(exclude_unset=True)
+            for key, value in update_data.items():
+                user[key] = value
+            return user
     raise HTTPException(status_code=404, detail="User Not Found")
