@@ -1,7 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Optional
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 app = FastAPI()
+
+engine = create_engine("sqlite:///.test.db", echo=True)
+SessionLocal = sessionmaker(bind=engine)
+Base = declarative_base()
 
 users = []
 next_id = 1
@@ -50,7 +57,7 @@ def get_users():
 
 @app.get("/users/{id}", response_model=UserResponse)
 def get_user_id(id: int):
-    for user in users
+    for user in users:
         if user["id"] == id:
             return user
     raise HTTPException(status_code=404, detail="User Not Found")
@@ -68,6 +75,7 @@ def update_user(id: int, data: UserUpdate):
     for user in users:
         if user["id"] == id:
             update_data = data.model_dump(exclude_unset=True)
+            print(f"Updating user {id} with data: {update_data}")
             for key, value in update_data.items():
                 user[key] = value
             return user
