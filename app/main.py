@@ -1,46 +1,14 @@
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
-from typing import Optional
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from app.database import Base, engine, get_db
+from app.models import User
+from app.schemas import EchoRequest, UserCreate, UserResponse, UserUpdate
+from app.crud import get_user_by_id, get_all_users
 
 app = FastAPI()
 
-engine = create_engine("sqlite:///./test.db", echo=True)
-SessionLocal = sessionmaker(bind=engine)
-Base = declarative_base()
-
-class User(Base):
-    __tablename__ = "users"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-
 Base.metadata.create_all(bind=engine)
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-# users = []
-# next_id = 1
-
-class EchoRequest(BaseModel):
-    message: str
-    times: int
-
-class UserCreate(BaseModel):
-    name: str
-
-class UserResponse(BaseModel):
-    id: int
-    name: str
-
-class UserUpdate(BaseModel):
-    name: Optional[str] = None
 
 @app.get("/health")
 def health():
@@ -51,12 +19,6 @@ def echo(data: EchoRequest):
     return {
         "result": data.message * data.times
     }
-
-def get_user_by_id(db: Session, id: int):
-    return db.query(User).filter(User.id == id).first()
-
-def get_all_users(db: Session):
-    return db.query(User).all()
 
 @app.post("/users", response_model=UserResponse)
 def create_user(data: UserCreate, db: Session = Depends(get_db)):
