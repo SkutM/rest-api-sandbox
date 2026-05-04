@@ -32,8 +32,8 @@ def create_user(data: UserCreate, db: Session = Depends(get_db)):
 # list[UserResponse] means "the response will be a list
 # of users, where each user matches UserResponse"
 @app.get("/users", response_model=list[UserResponse])
-def get_users(db: Session = Depends(get_db)):
-    return get_all_users(db)
+def get_users(db: Session = Depends(get_db), limit: int = 10, offset: int = 0):
+    return get_all_users(db, limit=limit, offset=offset)
 
 @app.get("/users/{id}", response_model=UserResponse)
 def get_user_id(id: int, db: Session = Depends(get_db)):
